@@ -1,6 +1,11 @@
 from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 import json
 import logging
+import time
+
+# 导入任务管理器
+from .task_manager import task_manager
 
 # 获取logger实例
 logger = logging.getLogger(__name__)
@@ -8,6 +13,28 @@ logger = logging.getLogger(__name__)
 def hello(request):
     return HttpResponse("Hello, World!")
 
+def perform_tiktok_scrolling(**kwargs):
+    """
+    执行TikTok滚动任务的实际函数
+    这个函数将由任务管理器的设备线程调用
+    """
+    try:
+        # 从kwargs中获取参数
+        device_id = kwargs.get('device_id')
+        pad_code = kwargs.get('pad_code')
+        local_ip = kwargs.get('local_ip')
+        local_port = kwargs.get('local_port')
+        scrolling_time = kwargs.get('scrolling_time')
+        logger.info(f"设备名称{device_id}")
+        time.sleep(10)
+        return {"status": "success", "message": "Scrolling completed"}
+        
+    except Exception as e:
+        device_id = kwargs.get('device_id', 'unknown')
+        logger.error(f"Error during TikTok scrolling for device {device_id}: {str(e)}")
+        raise
+
+@csrf_exempt
 def tiktok_scrolling(request):
     if request.method == 'POST':
         try:
@@ -20,19 +47,43 @@ def tiktok_scrolling(request):
             local_ip = data.get('localIp')
             local_port = data.get('localPort')
             scrolling_time = data.get('scrollingTime')
+            
             # 记录参数（用于调试）
-            logger.debug(f"Received parameters:")
-            logger.debug(f"deviceId: {device_id}")
-            logger.debug(f"padCode: {pad_code}")
-            logger.debug(f"localIp: {local_ip}")
-            logger.debug(f"localPort: {local_port}")
+            logger.debug(f"Received parameters for TikTok scrolling:")
+            logger.debug(f"deviceId: {device_id},  padCode: {pad_code}")
+            logger.debug(f"localIp: {local_ip}, localPort: {local_port} ")
             logger.debug(f"scrollingTime: {scrolling_time}")
-
+            
+            # 参数验证
+            if not device_id:
+                logger.error("deviceId is required")
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'deviceId is required'
+                }, status=400)
+            
+            # 将任务添加到任务管理器
+            task_id = task_manager.add_task(
+                device_id=device_id,
+                task_func=perform_tiktok_scrolling,
+                pad_code=pad_code,
+                local_ip=local_ip,
+                local_port=local_port,
+                scrolling_time=scrolling_time
+            )
+            
+            # 获取队列大小
+            queue_size = task_manager.get_device_queue_size(device_id)
+            
+            logger.info(f"Task {task_id} added to device {device_id} queue. Current queue size: {queue_size}")
+            
             # 返回成功响应
             return JsonResponse({
                 'status': 'success',
-                'message': 'Parameters received successfully',
-                'received_data': data
+                'message': 'Task added to queue successfully',
+                'task_id': task_id,
+                'queue_size': queue_size,
+                'device_id': device_id
             }, status=200)
             
         except json.JSONDecodeError:
