@@ -1,5 +1,8 @@
 import logging
 import os
+import socket
+import subprocess
+import threading
 from paramiko import SSHClient, AutoAddPolicy
 from . import vmos 
 
@@ -11,7 +14,7 @@ def connect_device(device_id: str,pad_code: str,local_ip: str,local_port: int):
         pad_info = vmos.get_pad_adb(pad_code)
         pad_info["device_id"] = device_id
         pad_info["local_ip"] = local_ip
-        pad_info["local_port"] = local_port
+        # pad_info["local_port"] = local_port
         open_ssh(pad_info)
         connect_adb(pad_info)
     elif device_id.startswith("MYT"):
