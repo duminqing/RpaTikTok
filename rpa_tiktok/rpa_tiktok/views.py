@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import logging
 import time
-
+from . connect_device import connect_device
 # 导入任务管理器
 from .task_manager import task_manager
 
@@ -25,7 +25,10 @@ def perform_tiktok_scrolling(**kwargs):
         local_ip = kwargs.get('local_ip')
         local_port = kwargs.get('local_port')
         scrolling_time = kwargs.get('scrolling_time')
-        logger.info(f"设备名称{device_id}")
+        # 连接设备
+        logger.info(f"连接设备{device_id}")
+        connect_device(device_id, pad_code, local_ip, local_port)
+        
         time.sleep(10)
         return {"status": "success", "message": "Scrolling completed"}
         
