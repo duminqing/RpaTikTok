@@ -42,25 +42,11 @@ def tiktok_scrolling(request):
             data = json.loads(request.body)
             
             # 获取参数
-            device_id = data.get('deviceId')
-            pad_code = data.get('padCode')
-            local_ip = data.get('localIp')
-            local_port = data.get('localPort')
-            scrolling_time = data.get('scrollingTime')
-            
-            # 记录参数（用于调试）
-            logger.debug(f"Received parameters for TikTok scrolling:")
-            logger.debug(f"deviceId: {device_id},  padCode: {pad_code}")
-            logger.debug(f"localIp: {local_ip}, localPort: {local_port} ")
-            logger.debug(f"scrollingTime: {scrolling_time}")
-            
-            # 参数验证
-            if not device_id:
-                logger.error("deviceId is required")
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'deviceId is required'
-                }, status=400)
+            device_id = data.get('device_id')
+            pad_code = data.get('pad_code')
+            local_ip = data.get('local_ip')
+            local_port = data.get('local_port')
+            scrolling_time = data.get('scrolling_time')
             
             # 将任务添加到任务管理器
             task_id = task_manager.add_task(
