@@ -26,6 +26,10 @@ def prepareEnviroment(device_id: str, pad_code: str, local_ip: str, local_port: 
         connect_adb(pad_info)
     elif device_id.startswith("MYT"):
         #否则使用adb connect命令连接设备
+        pad_info = {}
+        pad_info["device_id"] = device_id
+        pad_info["local_ip"] = local_ip
+        pad_info["local_port"] = local_port
         connect_adb(pad_info)
 
 
