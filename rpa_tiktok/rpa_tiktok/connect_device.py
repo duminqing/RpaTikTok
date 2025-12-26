@@ -5,22 +5,30 @@ import subprocess
 import threading
 from paramiko import SSHClient, AutoAddPolicy
 from . import vmos 
+import uiautomator2 as u2
 
 logger = logging.getLogger(__name__)
 def connect_device(device_id: str,pad_code: str,local_ip: str,local_port: int):
     """ 连接设备 """
-    #判断如果device_id以"VMOS"开头
+    prepareEnviroment(device_id, pad_code, local_ip, local_port)
+    return u2.connect( f"{local_ip}:{local_port}")
+
+
+def prepareEnviroment(device_id: str, pad_code: str, local_ip: str, local_port: int):
+    """ 准备环境 """
     if device_id.startswith("VMOS"):
+        #判断如果device_id以"VMOS"开头
         pad_info = vmos.get_pad_adb(pad_code)
         pad_info["device_id"] = device_id
         pad_info["local_ip"] = local_ip
-        # pad_info["local_port"] = local_port
+        pad_info["local_port"] = local_port
         open_ssh(pad_info)
         connect_adb(pad_info)
     elif device_id.startswith("MYT"):
         #否则使用adb connect命令连接设备
-        os.system(f"adb connect {local_ip}:{local_port}")
-    
+        connect_adb(pad_info)
+
+
 def open_ssh(pad_info: dict):
     """创建SSH连接并保持60分钟不断开"""
     username = pad_info['username']
@@ -30,10 +38,11 @@ def open_ssh(pad_info: dict):
     remote_host = pad_info['remote_host']
     remote_port = int(pad_info['remote_port'])
     password = pad_info['password']
-    device_id = pad_info.get('device_id', 'unknown')
+    device_id = pad_info.get('device_id')
+
     
-    logger.info(f"正在为设备 {device_id} 创建SSH连接: {username}@{hostname}:{port}")
-    logger.info(f"端口转发配置: localhost:{local_port} -> {remote_host}:{remote_port}")
+    logger.info(f" {device_id} 正在为设备创建SSH连接: {username}@{hostname}:{port}")
+    logger.info(f" {device_id} 端口转发配置: localhost:{local_port} -> {remote_host}:{remote_port}")
     
     try:
         # 建立 SSH 连接
@@ -108,10 +117,10 @@ def open_ssh(pad_info: dict):
                         break
         tunnel_thread = threading.Thread(target=forward_port, daemon=True)
         tunnel_thread.start()
-        logger.info(f'SSH 隧道建立成功，本地端口: {local_port} -> {remote_host}:{remote_port}')
+        logger.info(f'{device_id}SSH 隧道建立成功，本地端口: {local_port} -> {remote_host}:{remote_port}')
         return True
     except Exception as e:
-        logger.error(f'建立 SSH 隧道失败: {str(e)}', exc_info=True)
+        logger.error(f'{device_id}建立 SSH 隧道失败: {str(e)}', exc_info=True)
         return False
 
 def connect_adb(pad_info: dict):
@@ -119,10 +128,8 @@ def connect_adb(pad_info: dict):
     try:
         cmd = f"adb connect {pad_info['local_ip']}:{pad_info['local_port']}"
         print(f"执行命令: {cmd}")
-        
         # 执行adb命令
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
-        
         # 检查命令执行结果
         if result.returncode == 0:
             logger.info(f"ADB连接成功: {result.stdout.strip()}")

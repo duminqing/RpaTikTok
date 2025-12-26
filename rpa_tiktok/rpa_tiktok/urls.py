@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('hello/', views.hello, name='hello'),
     path('tiktok-scrolling/', views.tiktok_scrolling, name='tiktok_scrolling'),
+    path('tiktok-post/', views.tiktok_post, name='tiktok_post'),
 ]
