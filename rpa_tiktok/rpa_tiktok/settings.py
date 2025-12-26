@@ -127,7 +127,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module:<12} {process:d} {thread:d} {message}',
+            'format': '{levelname:<5} {asctime} {module:<16} {process:d} {thread:d} {message}',
             'style': '{',
         },
         'simple': {

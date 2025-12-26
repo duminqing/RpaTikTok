@@ -15,7 +15,7 @@ def perform_tiktok_post(**kwargs):
     logger.info(f"{device_id}连接设备")
     #TODO try catch
     device = connect_device(device_id, pad_code, local_ip, local_port)
-    #upload_video(device, video_path)
+    upload_video(device, video_path)
     open_tiktok(device)
     post_video(device, device_id, video_desc)
 
