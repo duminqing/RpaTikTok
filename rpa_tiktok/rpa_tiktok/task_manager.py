@@ -142,8 +142,10 @@ class TaskManager:
                 logger.info(f"Cleaning up stopped thread for device {device_id}")
                 del self.device_threads[device_id]
 
-    def add_task(self, device_id: str, task_func: Callable, *args, **kwargs) -> str:
+    def add_task(self, task_func: Callable, *args, **kwargs) -> str:
         """添加任务到对应设备的队列"""
+        # 从kwargs中获取device_id
+        device_id = kwargs.get('device_id')
         if not device_id:
             raise ValueError("device_id cannot be empty")
         
@@ -188,3 +190,4 @@ class TaskManager:
 
 # 全局任务管理器实例
 task_manager = TaskManager()
+

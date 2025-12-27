@@ -30,8 +30,8 @@ def tiktok_post(request):
             
             # 将任务添加到任务管理器
             task_id = task_manager.add_task(
-                device_id=device_id,
                 task_func=perform_tiktok_post,
+                device_id=device_id,
                 pad_code=pad_code,
                 local_ip=local_ip,
                 local_port=local_port,
@@ -86,8 +86,8 @@ def tiktok_scrolling(request):
             
             # 将任务添加到任务管理器
             task_id = task_manager.add_task(
-                device_id=device_id,
                 task_func=perform_tiktok_scrolling,
+                device_id=device_id,
                 pad_code=pad_code,
                 local_ip=local_ip,
                 local_port=local_port,
