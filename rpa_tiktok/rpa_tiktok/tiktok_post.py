@@ -101,7 +101,7 @@ def press_home(device):
 
 def screenshot(device, error_detail, **kwargs):
     device_id = kwargs.get('device_id')
-    screenshot_path = rf"E:/ScreenShot/{error_detail}_{device_id}_{time.strftime('%Y%m%d %H%M%S', time.localtime())}.png"
+    screenshot_path = rf"E:/ScreenShot/{error_detail}_{device_id}_{time.strftime('%Y%m%d_%H%M%S', time.localtime())}.png"
     device.screenshot(screenshot_path)
     random_sleep()
     send_log(screenshot_path, error_detail, **kwargs)
