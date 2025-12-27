@@ -1,4 +1,5 @@
 import random
+import requests
 from . connect_device import connect_device
 import logging
 import time
@@ -98,11 +99,12 @@ def upload_video(device, video_path):
 def press_home(device):
     device.press("home")
 
-def screenshot(device, error_type, **kwargs):
+def screenshot(device, error_detail, **kwargs):
     device_id = kwargs.get('device_id')
-    screenshot_path = rf"E:/ScreenShot/{error_type}_{device_id}_{time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime())}.png"
+    screenshot_path = rf"E:/ScreenShot/{error_detail}_{device_id}_{time.strftime('%Y%m%d %H%M%S', time.localtime())}.png"
     device.screenshot(screenshot_path)
     random_sleep()
+    send_log(screenshot_path, error_detail, **kwargs)
     return screenshot_path
 
 def open_tiktok(device):
@@ -128,3 +130,37 @@ def click_bound(device, bounds):
     target_y = max(y1, min(target_y, y2))
     device.click(target_x, target_y)
     random_sleep()
+
+def send_log(screenshot, error_detail, **kwargs):
+    """
+    调用外部接口发送日志数据
+    """
+    try:
+        # 从kwargs中获取参数
+        device_id = kwargs.get('device_id')
+        task_id = kwargs.get('task_id')
+        task_type = kwargs.get('task_type')
+        # 构建请求数据
+        payload = {
+            "deviceId": device_id,
+            "taskId": task_id,
+            "taskType": task_type,
+            "errorDetail": error_detail,
+            "screenshot": screenshot
+        }
+        
+        # 发送POST请求
+        url = 'http://localhost/rpa/log/add'
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(url, json=payload, headers=headers)
+        
+        # 检查响应状态
+        if response.status_code == 0:
+            logger.info(f"日志发送成功，设备ID: {device_id}, 任务ID: {task_id}")
+            return True
+        else:
+            logger.error(f"日志发送失败，状态码: {response.status_code}, 响应内容: {response.text}")
+            return False
+    except Exception as e:
+        logger.error(f"发送日志时发生错误: {str(e)}")
+        return False

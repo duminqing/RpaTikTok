@@ -36,7 +36,8 @@ def tiktok_post(request):
                 local_ip=local_ip,
                 local_port=local_port,
                 video_path=video_path,
-                video_desc=video_desc
+                video_desc=video_desc,
+                task_type='tiktok_post'
             )
             
             # 获取队列大小
@@ -91,7 +92,8 @@ def tiktok_scrolling(request):
                 pad_code=pad_code,
                 local_ip=local_ip,
                 local_port=local_port,
-                scrolling_time=scrolling_time
+                scrolling_time=scrolling_time,
+                task_type='tiktok_scrolling'
             )
             
             # 获取队列大小
