@@ -155,7 +155,7 @@ def send_log(screenshot, error_detail, **kwargs):
         response = requests.post(url, json=payload, headers=headers)
         
         # 检查响应状态
-        if response.status_code == 0:
+        if response.status_code == 200:
             logger.info(f"日志发送成功，设备ID: {device_id}, 任务ID: {task_id}")
             return True
         else:
