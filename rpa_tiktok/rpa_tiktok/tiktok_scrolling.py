@@ -35,7 +35,7 @@ def perform_tiktok_scrolling(**kwargs):
             device.swipe_ext("up")
             app_current = device.app_current()['package']
             if app_current != 'com.zhiliaoapp.musically' and app_current != 'om.ss.android.ugc.trill':
-                logger.error(f"{device_id}当前应用包名：{app_current} 当前应用不是TikTok，可能已经退出，截图路径: {screenshot(device, device_id, "EXIT")}")
+                logger.error(f"{device_id}当前应用包名：{app_current} 当前应用不是TikTok，可能已经退出，截图路径: {screenshot(device, "EXIT", **kwargs)}")
                 open_tiktok(device)
                 continue
             random_sleep()
@@ -53,20 +53,20 @@ def perform_tiktok_scrolling(**kwargs):
                     click_favourites(device)
                     random_sleep()
         except Exception as e:
-            logger.error(f"{device_id}刷视频异常，截图路径: {screenshot(device, device_id, "ERROR")}，错误信息: {str(e)}")
+            logger.error(f"{device_id}刷视频异常，截图路径: {screenshot(device, "ERROR", **kwargs)}，错误信息: {str(e)}")
             open_tiktok(device)
             continue
     press_home(device)
     return {"status": "success", "message": "Scrolling completed"}
 
-def click_like(device,device_id):
+def click_like(device,**kwargs):
     try:
         device(descriptionContains="Like").click()
     except:
-        logger.error(f"点击点赞失败,{screenshot(device, device_id, "LIKE_ERROR")}")
+        logger.error(f"点击点赞失败,{screenshot(device, "LIKE_ERROR", **kwargs)}")
 
-def click_favourites(device,device_id):
+def click_favourites(device,**kwargs):
     try:
         click_bound(device, (975,1370,1065,1460))
     except:
-        logger.error(f"点击收藏失败,{screenshot(device, device_id, "FAVOURITES_ERROR")}")
+        logger.error(f"点击收藏失败,{screenshot(device, "FAVOURITES_ERROR", **kwargs)}")

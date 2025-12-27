@@ -23,11 +23,14 @@ def perform_tiktok_post(**kwargs):
     try:
         post_video(device, device_id, video_desc)
     except Exception as e:
-        logger.error(f"{device_id}发布视频失败: {str(e)}，截图地址{screenshot(device, device_id, "POST_ERROR")}")
+        logger.error(f"{device_id}发布视频失败: {str(e)}，截图地址{screenshot(device,"POST_ERROR", **kwargs)}")
         return {"status": "error", "message": f"发布视频失败: {str(e)}"}
     press_home(device)
 
-def post_video(device, device_id, video_desc):
+def post_video(**kwargs):
+    device_id = kwargs.get('device_id')
+    device = kwargs.get('device')
+    video_desc = kwargs.get('video_desc')
     if(device_id.startswith("VMOS")):
         logger.info(f"{device_id}点击发视频...")
         click_bound(device, (465,1822,615,1920)) #[465,1822][615,1920]
@@ -72,7 +75,7 @@ def post_video(device, device_id, video_desc):
         logger.info(f"{device_id}点击发布...")
         device(text="Post").click()
         random_sleep()
-    screenshot(device, device_id, "POST_END")
+    screenshot(device, "POST_END", **kwargs)
 
 
 def upload_video(device, video_path):
@@ -95,8 +98,9 @@ def upload_video(device, video_path):
 def press_home(device):
     device.press("home")
 
-def screenshot(device, device_id, type):
-    screenshot_path = rf"E:/ScreenShot/{type}_{device_id}_{time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime())}.png"
+def screenshot(device, error_type, **kwargs):
+    device_id = kwargs.get('device_id')
+    screenshot_path = rf"E:/ScreenShot/{error_type}_{device_id}_{time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime())}.png"
     device.screenshot(screenshot_path)
     random_sleep()
     return screenshot_path

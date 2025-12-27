@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 
 class Task:
     """任务类，表示需要执行的任务"""
-    def __init__(self, task_id: str, device_id: str, task_func: Callable, *args, **kwargs):
-        self.task_id = task_id
-        self.device_id = device_id
+    def __init__(self, task_func: Callable, *args, **kwargs):
+        self.task_id = kwargs.get('task_id')
+        self.device_id = kwargs.get('device_id')
         self.task_func = task_func
         self.args = args
         self.kwargs = kwargs
@@ -50,10 +50,8 @@ class DeviceThread(threading.Thread):
                 task.start_time = time.time()
                 
                 try:
-                    # 执行任务函数，将device_id添加到kwargs中
-                    task_kwargs = task.kwargs.copy()
-                    task_kwargs['device_id'] = task.device_id
-                    task.result = task.task_func(*task.args, **task_kwargs)
+                    # 执行任务函数，device_id已经在kwargs中
+                    task.result = task.task_func(*task.args, **task.kwargs)
                     task.status = 'completed'
                     logger.info(f"Task {task.task_id} completed successfully for device {self.device_id}")
                 except Exception as e:
@@ -151,7 +149,10 @@ class TaskManager:
         
         # 创建任务
         task_id = self._get_next_task_id()
-        task = Task(task_id, device_id, task_func, *args, **kwargs)
+        kwargs['task_id'] = task_id
+        
+        # 创建Task实例，使用修改后的构造函数参数顺序
+        task = Task(task_func, *args, **kwargs)
         
         # 获取或创建设备线程并添加任务
         thread = self._get_or_create_thread(device_id)
@@ -190,4 +191,8 @@ class TaskManager:
 
 # 全局任务管理器实例
 task_manager = TaskManager()
+
+
+
+
 
