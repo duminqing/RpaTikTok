@@ -6,11 +6,6 @@ import logging
 import time
 logger = logging.getLogger(__name__)
 
-# 自增主键计数器
-video_counter = 0
-# 上次使用的日期
-last_date = None
-
 def perform_tiktok_post(**kwargs):
     device_id = kwargs.get('device_id')
     pad_code = kwargs.get('pad_code')
@@ -86,7 +81,6 @@ def post_video(**kwargs):
 
 
 def upload_video(device, video_path):
-    global video_counter, last_date
     # 获取当前日期，格式为YYYYMMDDHHMMSS
     current_date = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     # 获取原文件名
