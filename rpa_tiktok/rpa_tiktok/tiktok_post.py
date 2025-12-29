@@ -17,21 +17,20 @@ def perform_tiktok_post(**kwargs):
     logger.info(f"{device_id}连接设备")
     try:
         device = connect_device(device_id, pad_code, local_ip, local_port)
-        upload_video(device, video_path)
+        #upload_video(device, video_path)
     except Exception as e:
         logger.error(f"{device_id}连接设备失败: {str(e)}")
         return {"status": "error", "message": f"连接设备失败: {str(e)}"}
     open_tiktok(device)
     try:
-        post_video(device, device_id, video_desc)
+        post_video(device,**kwargs)
     except Exception as e:
         logger.error(f"{device_id}发布视频失败: {str(e)}，截图地址{screenshot(device,"POST_ERROR", **kwargs)}")
         return {"status": "error", "message": f"发布视频失败: {str(e)}"}
     press_home(device)
 
-def post_video(**kwargs):
+def post_video(device, **kwargs):
     device_id = kwargs.get('device_id')
-    device = kwargs.get('device')
     video_desc = kwargs.get('video_desc')
     if(device_id.startswith("VMOS")):
         logger.info(f"{device_id}点击发视频...")
@@ -56,7 +55,7 @@ def post_video(**kwargs):
     else:
         logger.info(f"{device_id}点击发视频...")
         click_bound(device, (432,1794,648,1920))
-        if(device_id=='MYT001'):
+        if(device_id=='MYT_001'):
             logger.info(f"{device_id}点击相册...")
             click_bound(device, (48,1767,156,1875)) 
         else:
