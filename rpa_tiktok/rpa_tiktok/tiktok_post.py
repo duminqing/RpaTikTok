@@ -1,9 +1,15 @@
 import random
 import requests
+import datetime
 from . connect_device import connect_device
 import logging
 import time
 logger = logging.getLogger(__name__)
+
+# 自增主键计数器
+video_counter = 0
+# 上次使用的日期
+last_date = None
 
 def perform_tiktok_post(**kwargs):
     device_id = kwargs.get('device_id')
@@ -80,7 +86,12 @@ def post_video(**kwargs):
 
 
 def upload_video(device, video_path):
-    video_name = video_path.split('/')[-1]
+    global video_counter, last_date
+    # 获取当前日期，格式为YYYYMMDDHHMMSS
+    current_date = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    # 获取原文件名
+    ext_part = video_path.split('.')[-1]
+    video_name = f"{current_date}.{ext_part}"
     tmp_path = f"/data/local/tmp/{video_name}"      
     final_path = f"/sdcard/Download/{video_name}"
     # 第一步：推送到临时目录
@@ -131,7 +142,7 @@ def click_bound(device, bounds):
     device.click(target_x, target_y)
     random_sleep()
 
-def send_log(screenshot, error_detail, **kwargs):
+def send_log(screenshot, error_desc, **kwargs):
     """
     调用外部接口发送日志数据
     """
@@ -143,9 +154,9 @@ def send_log(screenshot, error_detail, **kwargs):
         # 构建请求数据
         payload = {
             "deviceId": device_id,
-            "taskId": task_id,
+            "rpaTaskId": task_id,
             "taskType": task_type,
-            "errorDetail": error_detail,
+            "errorDesc": error_desc,
             "screenshot": screenshot
         }
         
