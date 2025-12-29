@@ -17,7 +17,7 @@ def perform_tiktok_post(**kwargs):
     logger.info(f"{device_id}连接设备")
     try:
         device = connect_device(device_id, pad_code, local_ip, local_port)
-        #upload_video(device, video_path)
+        upload_video(device, video_path)
     except Exception as e:
         logger.error(f"{device_id}连接设备失败: {str(e)}")
         return {"status": "error", "message": f"连接设备失败: {str(e)}"}
