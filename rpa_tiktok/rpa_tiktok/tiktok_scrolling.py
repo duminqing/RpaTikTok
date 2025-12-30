@@ -17,8 +17,9 @@ def perform_tiktok_scrolling(**kwargs):
     local_ip = kwargs.get('local_ip')
     local_port = kwargs.get('local_port')
     scrolling_time =(int) (kwargs.get('scrolling_time'))
+    task_id=kwargs.get('task_id')   
     # 连接设备
-    logger.info(f"{device_id}正在连接设备")
+    logger.info(f"{device_id}正在连接设备task_id:{task_id}")    
     try:
         device = connect_device(device_id, pad_code, local_ip, local_port)
         open_tiktok(device)
