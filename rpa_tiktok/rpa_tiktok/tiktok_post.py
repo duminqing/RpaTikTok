@@ -76,8 +76,45 @@ def post_video(device, **kwargs):
         logger.info(f"{device_id}点击发布...")
         device(text="Post").click()
         random_sleep()
+    click_bound(device, (954,1475,1050,1571)) #[954,1475][1050,1571]
+    device(description="Copy link").click()
+    random_sleep(60,61)
+    kwargs['post_url'] = device.clipboard
+    print(f"任务{kwargs['task_id']}上传成功 {kwargs['post_url']}")
     screenshot(device, "POST_END", **kwargs)
+    #发送
+    send_post_data(**kwargs)
 
+def send_post_data(**kwargs):
+    """
+    发送发布数据到接口
+    """
+    try:
+        # 从kwargs中获取参数
+        task_id = kwargs.get('task_id')
+        post_url = kwargs.get('post_url', '')
+        
+        # 构建请求数据
+        payload = {
+            "rpaTaskId": task_id,
+            "postUrl": post_url
+        }
+        
+        # 发送POST请求
+        url = 'http://localhost/rpa/post/edit'
+        headers = {'Accept': 'application/json, text/javascript, */*; q=0.01'}
+        response = requests.post(url, data=payload, headers=headers)
+        
+        # 检查响应状态
+        if response.status_code == 200:
+            logger.info(f"发布数据发送成功，任务ID: {task_id}, 发布URL: {post_url}")
+            return True
+        else:
+            logger.error(f"发布数据发送失败，状态码: {response.status_code}, 响应内容: {response.text}")
+            return False
+    except Exception as e:
+        logger.error(f"发送发布数据时发生错误: {str(e)}")
+        return False
 
 def upload_video(device, video_path):
     # 获取当前日期，格式为YYYYMMDDHHMMSS
