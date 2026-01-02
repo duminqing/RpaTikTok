@@ -13,6 +13,7 @@ def perform_tiktok_post(**kwargs):
     local_port = kwargs.get('local_port')
     video_path = kwargs.get('video_path')
     video_desc = kwargs.get('video_desc')
+    task_id = kwargs.get('task_id')
     # 连接设备
     logger.info(f"{device_id}连接设备")
     try:
@@ -25,12 +26,13 @@ def perform_tiktok_post(**kwargs):
     try:
         post_video(device,**kwargs)
     except Exception as e:
-        logger.error(f"{device_id}发布视频失败: {str(e)}，截图地址{screenshot(device,"POST_ERROR", **kwargs)}")
+        logger.error(f"{device_id}发布视频失败: {str(e)}，截图地址{screenshot(device,task_id,"POST_ERROR")}")
         return {"status": "error", "message": f"发布视频失败: {str(e)}"}
     press_home(device)
 
 def post_video(device, **kwargs):
     device_id = kwargs.get('device_id')
+    task_id = kwargs.get('task_id')
     video_desc = kwargs.get('video_desc')
     if(device_id.startswith("VMOS")):
         logger.info(f"{device_id}点击发视频...")
@@ -53,35 +55,35 @@ def post_video(device, **kwargs):
         device(text="Post").click()
         random_sleep()
     else:
-        logger.info(f"{device_id}点击发视频...")
+        logger.info(f"{task_id}点击发视频...")
         click_bound(device, (432,1794,648,1920))
         if(device_id=='MYT_001'):
-            logger.info(f"{device_id}点击相册...")
+            logger.info(f"{task_id}点击相册...")
             click_bound(device, (48,1767,156,1875)) 
         else:
-            logger.info(f"{device_id}选择相册...")
+            logger.info(f"{task_id}选择相册...")
             click_bound(device, (807,1521,963,1677))
-        logger.info(f"{device_id}点击视频TAB...")
+        logger.info(f"{task_id}点击视频TAB...")
         device(text="Videos").click()
         random_sleep()
-        logger.info(f"{device_id}选择第一个视频...")
+        logger.info(f"{task_id}选择第一个视频...")
         click_bound(device, (6,357,358,713)) 
-        logger.info(f"{device_id}点击下一步...")
+        logger.info(f"{task_id}点击下一步...")
         device(text="Next").click()
         random_sleep()
-        logger.info(f"{device_id}输入视频描述...")
+        logger.info(f"{task_id}输入视频描述...")
         input_element = device(textContains="Add description")
         input_element.set_text(video_desc)
         random_sleep()
-        logger.info(f"{device_id}点击发布...")
+        logger.info(f"{task_id}点击发布...")
         device(text="Post").click()
         random_sleep()
     click_bound(device, (954,1475,1050,1571)) #[954,1475][1050,1571]
     device(description="Copy link").click()
     random_sleep(60,61)
     kwargs['post_url'] = device.clipboard
-    print(f"任务{kwargs['task_id']}上传成功 {kwargs['post_url']}")
-    screenshot(device, "POST_END", **kwargs)
+    print(f"任务{task_id}上传成功 {kwargs['post_url']}")
+    screenshot(device,task_id, "POST_END")
     #发送
     send_post_data(**kwargs)
 
@@ -101,7 +103,7 @@ def send_post_data(**kwargs):
         }
         
         # 发送POST请求
-        url = 'http://localhost/rpa/post/edit'
+        url = 'http://localhost/rpa/post/edit2'
         headers = {'Accept': 'application/json, text/javascript, */*; q=0.01'}
         response = requests.post(url, data=payload, headers=headers)
         
@@ -140,12 +142,10 @@ def upload_video(device, video_path):
 def press_home(device):
     device.press("home")
 
-def screenshot(device, error_detail, **kwargs):
-    device_id = kwargs.get('device_id')
-    screenshot_path = rf"E:/ScreenShot/{error_detail}_{device_id}_{time.strftime('%Y%m%d_%H%M%S', time.localtime())}.png"
+def screenshot(device,task_id, error_detail):
+    screenshot_path = rf"E:/ScreenShot/{error_detail}_{task_id}_{time.strftime('%Y%m%d%H%M%S', time.localtime())}.png"
     device.screenshot(screenshot_path)
     random_sleep()
-    send_log(screenshot_path, error_detail, **kwargs)
     return screenshot_path
 
 def open_tiktok(device):
@@ -171,37 +171,3 @@ def click_bound(device, bounds):
     target_y = max(y1, min(target_y, y2))
     device.click(target_x, target_y)
     random_sleep()
-
-def send_log(screenshot, error_desc, **kwargs):
-    """
-    调用外部接口发送日志数据
-    """
-    try:
-        # 从kwargs中获取参数
-        device_id = kwargs.get('device_id')
-        task_id = kwargs.get('task_id')
-        task_type = kwargs.get('task_type')
-        # 构建请求数据
-        payload = {
-            "deviceId": device_id,
-            "rpaTaskId": task_id,
-            "taskType": task_type,
-            "errorDesc": error_desc,
-            "screenshot": screenshot
-        }
-        
-        # 发送POST请求
-        url = 'http://localhost/rpa/log/add'
-        headers = {'Content-Type': 'application/json'}
-        response = requests.post(url, json=payload, headers=headers)
-        
-        # 检查响应状态
-        if response.status_code == 200:
-            logger.info(f"日志发送成功，设备ID: {device_id}, 任务ID: {task_id}")
-            return True
-        else:
-            logger.error(f"日志发送失败，状态码: {response.status_code}, 响应内容: {response.text}")
-            return False
-    except Exception as e:
-        logger.error(f"发送日志时发生错误: {str(e)}")
-        return False

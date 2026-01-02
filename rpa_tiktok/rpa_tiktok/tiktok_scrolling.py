@@ -3,6 +3,8 @@ import logging
 import time
 import random
 from . tiktok_post import click_bound,open_tiktok,random_sleep,screenshot,press_home
+import uiautomator2 as u2
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,49 +21,50 @@ def perform_tiktok_scrolling(**kwargs):
     scrolling_time =(int) (kwargs.get('scrolling_time'))
     task_id=kwargs.get('task_id')   
     # 连接设备
-    logger.info(f"{device_id}正在连接设备task_id:{task_id}")    
+    logger.info(f"{task_id}正在连接设备{device_id}")    
     try:
         device = connect_device(device_id, pad_code, local_ip, local_port)
-        open_tiktok(device)
-        search(device)
     except Exception as e:
-        logger.error(f"{device_id}连接设备失败: {str(e)}")
-        return {"status": "error", "message": f"连接设备失败: {str(e)}"}
+        logger.error(f"{task_id}连接设备{device_id}失败: {str(e)}")
+        return {"status": "error", "message": f"{task_id}连接设备{device_id}失败"}
     
     end_time = time.time() + scrolling_time*60
     total=0
+    logger.info(f"{task_id}打开TikTok")
+    open_tiktok(device)
+    logger.info(f"{task_id}搜索pads")
+    search(device,task_id)
     while time.time()<end_time:
         try:
-            logger.info(f"{device_id}刷第{total+1}次")
+            logger.info(f"{task_id}刷第{total+1}次")
             total+=1
             device.swipe_ext("up")
             app_current = device.app_current()['package']
             if app_current != 'com.zhiliaoapp.musically' and app_current != 'om.ss.android.ugc.trill':
-                logger.error(f"{device_id}当前应用包名：{app_current} 当前应用不是TikTok，可能已经退出，截图路径: {screenshot(device, "EXIT", **kwargs)}")
+                logger.error(f"{task_id}当前应用包名：{app_current} 当前应用不是TikTok，可能已经退出，截图路径: {screenshot(device, task_id, "EXIT")}")
                 open_tiktok(device)
                 continue
             random_sleep()
             live_now_exists = device(text="LIVE now").exists()
             watch_live_exists = device(text="Tap to watch LIVE").exists()
             if live_now_exists or watch_live_exists:
-                logger.debug(f"{device_id}发现LIVE视频，继续下一个视频")
+                logger.debug(f"{task_id}发现LIVE视频，继续下一个视频")
                 continue
             else:
                 random_sleep(10,30)
+                if(random.randint(0,100)<10):
+                    click_like(device,task_id)
                 if(random.randint(0,100)<3):
-                    click_like(device)
-                    random_sleep()
-                if(random.randint(0,100)<3):
-                    click_favourites(device)
-                    random_sleep()
+                    click_favourites(device,task_id)
         except Exception as e:
-            logger.error(f"{device_id}刷视频异常，截图路径: {screenshot(device, "ERROR", **kwargs)}，错误信息: {str(e)}")
+            logger.error(f"{task_id}刷视频异常，截图路径: {screenshot(device,task_id, "ERROR")}，错误信息: {str(e)}")
             open_tiktok(device)
             continue
+    logger.info(f"{task_id}刷视频完成，共刷{total}次")
     press_home(device)
     return {"status": "success", "message": "Scrolling completed"}
 
-def search(device,**kwargs):
+def search(device,task_id):
     try:
         click_bound(device, (912,75,1080,243))#[912,75][1080,243]
         #//android.widget.EditText
@@ -69,23 +72,30 @@ def search(device,**kwargs):
         device.xpath('//android.widget.EditText').set_text("pads")
         random_sleep()
         # search按钮[836,84][1080,216]  //*[@text="Search"]
-        click_bound(device, (836,84,1080,216))
+        device.press("enter")
+        random_sleep()
         # Videos tab[466,228][615,348]  //*[@text="Videos"]
         device(text="Videos").click()
+        random_sleep()
         # 第一个视频 [24,372][528,1178]
         logger.info(f"点击第一个视频")
         click_bound(device, (24,372,528,1178))
+        random_sleep()
     except:
-        logger.error(f"点击搜索失败,{screenshot(device, "SEARCH_ERROR", **kwargs)}")
+        logger.error(f"点击搜索失败,{screenshot(device,task_id, "SEARCH_ERROR")}")
 
-def click_like(device,**kwargs):
+def click_like(device,task_id):
     try:
+        logger.info(f"{task_id}点击点赞")
         device(descriptionContains="Like").click()
+        random_sleep()
     except:
-        logger.error(f"点击点赞失败,{screenshot(device, "LIKE_ERROR", **kwargs)}")
+        logger.error(f"点击点赞失败,{screenshot(device,task_id, "LIKE_ERROR")}")
 
-def click_favourites(device,**kwargs):
+def click_favourites(device,task_id):
     try:
+        logger.info(f"{task_id}点击收藏")
         click_bound(device, (975,1370,1065,1460))
+        random_sleep()
     except:
-        logger.error(f"点击收藏失败,{screenshot(device, "FAVOURITES_ERROR", **kwargs)}")
+        logger.error(f"点击收藏失败,{screenshot(device,task_id, "FAVOURITES_ERROR")}")
