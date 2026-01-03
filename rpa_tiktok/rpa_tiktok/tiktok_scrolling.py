@@ -53,7 +53,7 @@ def perform_tiktok_scrolling(**kwargs):
                 random_sleep(10,30)
                 if(random.randint(0,100)<20):
                     click_like(device,task_id)
-                if(random.randint(0,100)<100):
+                if(random.randint(0,100)<10):
                     click_favourites(device,task_id)
         except Exception as e:
             logger.error(f"{task_id}刷视频异常，截图路径: {screenshot(device,task_id, "ERROR")}，错误信息: {str(e)}")
