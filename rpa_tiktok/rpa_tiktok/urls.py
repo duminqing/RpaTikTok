@@ -23,4 +23,5 @@ urlpatterns = [
     path('hello/', views.hello, name='hello'),
     path('tiktok-scrolling/', views.tiktok_scrolling, name='tiktok_scrolling'),
     path('tiktok-post/', views.tiktok_post, name='tiktok_post'),
+    path('tiktok-videa-data/', views.tiktok_videa_data, name='tiktok_videa_data'),
 ]

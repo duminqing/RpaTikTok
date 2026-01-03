@@ -2,8 +2,7 @@ from . connect_device import connect_device
 import logging
 import time
 import random
-from . tiktok_post import click_bound,open_tiktok,random_sleep,screenshot,press_home
-import uiautomator2 as u2
+from . tiktok_common import click_element, press_home, screenshot, open_tiktok, random_sleep, click_bound
 
 logger = logging.getLogger(__name__)
 
@@ -52,9 +51,9 @@ def perform_tiktok_scrolling(**kwargs):
                 continue
             else:
                 random_sleep(10,30)
-                if(random.randint(0,100)<10):
+                if(random.randint(0,100)<20):
                     click_like(device,task_id)
-                if(random.randint(0,100)<3):
+                if(random.randint(0,100)<100):
                     click_favourites(device,task_id)
         except Exception as e:
             logger.error(f"{task_id}刷视频异常，截图路径: {screenshot(device,task_id, "ERROR")}，错误信息: {str(e)}")
@@ -67,6 +66,12 @@ def perform_tiktok_scrolling(**kwargs):
 def search(device,task_id):
     try:
         click_bound(device, (912,75,1080,243))#[912,75][1080,243]
+        list = device.xpath('//android.widget.LinearLayout/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.ImageView').all()
+        if len(list) > 1:
+            element = list[1]
+            click_element(device, element)
+        else:
+            logger.warning(f"{task_id}收藏元素列表长度不足2个，当前长度: {len(list)}")
         #//android.widget.EditText
         # 方式2：简化写法（直接链式调用，若控件不存在会抛出异常，可按需使用）
         device.xpath('//android.widget.EditText').set_text("pads")
@@ -93,9 +98,20 @@ def click_like(device,task_id):
         logger.error(f"点击点赞失败,{screenshot(device,task_id, "LIKE_ERROR")}")
 
 def click_favourites(device,task_id):
+    #//androidx.viewpager.widget.ViewPager/android.widget.FrameLayout/android.widget.RelativeLayout/android.widget.RelativeLayout/android.widget.LinearLayout
+    
     try:
         logger.info(f"{task_id}点击收藏")
-        click_bound(device, (975,1370,1065,1460))
+        list = device.xpath('//androidx.viewpager.widget.ViewPager/android.widget.FrameLayout/android.widget.RelativeLayout/android.widget.RelativeLayout/android.widget.LinearLayout/android.widget.FrameLayout').all()
+        if len(list) > 3:
+            element = list[3]
+            click_element(device, element)
+        else:
+            logger.warning(f"{task_id}收藏元素列表长度不足4个，当前长度: {len(list)}")
+        # if device_id.startswith("MYT"):
+        #     click_bound(device, (923,1178,1080,1328)) #MYT_006[923,1178][1080,1328] #MYT001#[918,1208][1080,1370] 
+        # else:
+        #     click_bound(device, (975,1370,1065,1460)) 
         random_sleep()
     except:
         logger.error(f"点击收藏失败,{screenshot(device,task_id, "FAVOURITES_ERROR")}")
