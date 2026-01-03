@@ -65,7 +65,6 @@ def perform_tiktok_scrolling(**kwargs):
 
 def search(device,task_id):
     try:
-        click_bound(device, (912,75,1080,243))#[912,75][1080,243]
         list = device.xpath('//android.widget.LinearLayout/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.ImageView').all()
         if len(list) > 1:
             element = list[1]
