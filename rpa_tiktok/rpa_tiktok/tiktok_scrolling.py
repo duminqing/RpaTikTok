@@ -70,7 +70,7 @@ def search(device,task_id):
             element = list[1]
             click_element(device, element)
         else:
-            logger.warning(f"{task_id}收藏元素列表长度不足2个，当前长度: {len(list)}")
+            logger.warning(f"{task_id}元素列表长度不足2个，当前长度: {len(list)}")
         #//android.widget.EditText
         # 方式2：简化写法（直接链式调用，若控件不存在会抛出异常，可按需使用）
         device.xpath('//android.widget.EditText').set_text("pads")
