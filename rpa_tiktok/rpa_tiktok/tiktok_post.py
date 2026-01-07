@@ -34,7 +34,7 @@ def post_video(device, **kwargs):
     device_id = kwargs.get('device_id')
     task_id = kwargs.get('task_id')
     video_desc = kwargs.get('video_desc')
-    if(device_id.startswith("VMOS")):
+    if device_id.startswith("VMOS"):
         logger.info(f"{device_id}点击发视频...")
         click_bound(device, (465,1822,615,1920)) #[465,1822][615,1920]
         logger.info(f"{device_id}选择相册...")
@@ -57,7 +57,7 @@ def post_video(device, **kwargs):
     else:
         logger.info(f"{task_id}点击发视频...")
         click_bound(device, (432,1794,648,1920))
-        if(device_id=='MYT_001'):
+        if device_id== 'MYT_001':
             logger.info(f"{task_id}点击相册...")
             click_bound(device, (48,1767,156,1875)) 
         else:

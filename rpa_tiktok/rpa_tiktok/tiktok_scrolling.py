@@ -2,8 +2,9 @@ from . connect_device import connect_device
 import logging
 import time
 import random
+import asyncio
 from . tiktok_common import click_element, press_home, screenshot, open_tiktok, random_sleep, click_bound
-
+from . bit_scrolling import run_single_browser
 logger = logging.getLogger(__name__)
 
 
@@ -17,8 +18,12 @@ def perform_tiktok_scrolling(**kwargs):
     pad_code = kwargs.get('pad_code')
     local_ip = kwargs.get('local_ip')
     local_port = kwargs.get('local_port')
-    scrolling_time =(int) (kwargs.get('scrolling_time'))
-    task_id=kwargs.get('task_id')   
+    scrolling_time = int(kwargs.get('scrolling_time'))
+    task_id=kwargs.get('task_id')
+    if device_id.startswith("BIT"):
+        asyncio.run(run_single_browser(**kwargs))
+        return {"status": "success", "message": "Scrolling completed"}
+
     # 连接设备
     logger.info(f"{task_id}正在连接设备{device_id}")    
     try:
@@ -51,9 +56,9 @@ def perform_tiktok_scrolling(**kwargs):
                 continue
             else:
                 random_sleep(10,30)
-                if(random.randint(0,100)<20):
+                if random.randint(0, 100)<20:
                     click_like(device,task_id)
-                if(random.randint(0,100)<10):
+                if random.randint(0, 100)<10:
                     click_favourites(device,task_id)
         except Exception as e:
             logger.error(f"{task_id}刷视频异常，截图路径: {screenshot(device,task_id, "ERROR")}，错误信息: {str(e)}")

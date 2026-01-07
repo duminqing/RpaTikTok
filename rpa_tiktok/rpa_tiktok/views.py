@@ -125,7 +125,7 @@ def tiktok_scrolling(request):
             local_ip = data.get('local_ip')
             local_port = data.get('local_port')
             scrolling_time = data.get('scrolling_time')
-            
+            memo = data.get('memo')
             # 将任务添加到任务管理器
             task_id = task_manager.add_task(
                 task_func=perform_tiktok_scrolling,
@@ -134,6 +134,7 @@ def tiktok_scrolling(request):
                 local_ip=local_ip,
                 local_port=local_port,
                 scrolling_time=scrolling_time,
+                memo=memo,
                 task_type='tiktok_scrolling'
             )
             
