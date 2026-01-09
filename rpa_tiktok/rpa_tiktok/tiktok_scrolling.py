@@ -4,7 +4,6 @@ import time
 import random
 import asyncio
 from . tiktok_common import click_element, press_home, screenshot, open_tiktok, random_sleep, click_bound
-from . bit_scrolling import run_single_browser
 logger = logging.getLogger(__name__)
 
 
@@ -20,9 +19,6 @@ def perform_tiktok_scrolling(**kwargs):
     local_port = kwargs.get('local_port')
     scrolling_time = int(kwargs.get('scrolling_time'))
     task_id=kwargs.get('task_id')
-    if device_id.startswith("BIT"):
-        asyncio.run(run_single_browser(**kwargs))
-        return {"status": "success", "message": "Scrolling completed"}
 
     # 连接设备
     logger.info(f"{task_id}正在连接设备{device_id}")    

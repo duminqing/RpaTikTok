@@ -4,6 +4,9 @@ import time
 import asyncio
 from playwright.async_api import async_playwright, Playwright
 
+def perform_tiktok_scrolling(**kwargs):
+    asyncio.run(run_single_browser(**kwargs))
+
 async def run_single_browser(**kwargs):
     """
     单个浏览器执行任务

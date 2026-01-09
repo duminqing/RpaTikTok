@@ -2,11 +2,14 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 import logging
-from .tiktok_scrolling import perform_tiktok_scrolling
-from .tiktok_post import perform_tiktok_post
-from .tiktok_video_data import perform_tiktok_videa_data
-# 导入任务管理器
-from .task_manager import task_manager
+
+from . import bit_post
+from . import bit_scrolling
+from . import tiktok_post
+from . import tiktok_scrolling
+
+from . tiktok_video_data import perform_tiktok_videa_data
+from . task_manager import task_manager
 
 # 获取logger实例
 logger = logging.getLogger(__name__)
@@ -68,18 +71,23 @@ def tiktok_post(request):
             local_port = data.get('local_port')
             video_path = data.get('video_path')
             video_desc = data.get('video_desc')
-            
+
             # 将任务添加到任务管理器
+            if device_id.startswith("BIT"):
+                task_func = bit_post.perform_tiktok_post
+            else:
+                task_func = tiktok_post.perform_tiktok_post
+
             task_id = task_manager.add_task(
-                task_func=perform_tiktok_post,
-                device_id=device_id,
-                pad_code=pad_code,
-                local_ip=local_ip,
-                local_port=local_port,
-                video_path=video_path,
-                video_desc=video_desc,
-                task_type='tiktok_post'
-            )
+                    task_func=task_func,
+                    device_id=device_id,
+                    pad_code=pad_code,
+                    local_ip=local_ip,
+                    local_port=local_port,
+                    video_path=video_path,
+                    video_desc=video_desc,
+                    task_type='tiktok_post'
+                )
             
             # 获取队列大小
             queue_size = task_manager.get_device_queue_size(device_id)
@@ -126,9 +134,14 @@ def tiktok_scrolling(request):
             local_port = data.get('local_port')
             scrolling_time = data.get('scrolling_time')
             memo = data.get('memo')
+
+            if device_id.startswith("BIT"):
+                task_func = bit_scrolling.perform_tiktok_scrolling
+            else:
+                task_func = tiktok_scrolling.perform_tiktok_scrolling
             # 将任务添加到任务管理器
             task_id = task_manager.add_task(
-                task_func=perform_tiktok_scrolling,
+                task_func=task_func,
                 device_id=device_id,
                 pad_code=pad_code,
                 local_ip=local_ip,
