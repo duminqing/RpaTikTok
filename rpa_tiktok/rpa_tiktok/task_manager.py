@@ -24,6 +24,9 @@ class Task:
     def __str__(self):
         return f"Task({self.task_id}, device={self.device_id}, status={self.status})"
 
+
+BROWSER_SEMAPHORE = threading.Semaphore(4)
+
 class DeviceThread(threading.Thread):
     """设备线程类，管理单个设备的任务执行"""
     def __init__(self, device_id: str, timeout: int = 300):  # 默认5分钟超时
@@ -50,6 +53,16 @@ class DeviceThread(threading.Thread):
                 task.start_time = time.time()
                 
                 try:
+                    # 只对BIT设备应用浏览器信号量限制
+                    need_semaphore = self.device_id.startswith('BIT')
+                    semaphore_acquired = False
+
+                    if need_semaphore:
+                        # 获取浏览器信号量（这会阻塞直到有可用的浏览器槽位）
+                        BROWSER_SEMAPHORE.acquire()
+                        semaphore_acquired = True
+                        logger.info(f"Task {task.task_id} acquired browser semaphore for BIT device")
+
                     # 执行任务函数，device_id已经在kwargs中
                     task.result = task.task_func(*task.args, **task.kwargs)
                     task.status = 'completed'
@@ -59,6 +72,11 @@ class DeviceThread(threading.Thread):
                     task.error = str(e)
                     logger.error(f"Task {task.task_id} failed for device {self.device_id}: {str(e)}")
                 finally:
+                    # 如果获取了信号量，则释放它
+                    if semaphore_acquired:
+                        BROWSER_SEMAPHORE.release()
+                        logger.info(f"Task {task.task_id} released browser semaphore")
+
                     task.end_time = time.time()
                     # 标记任务完成
                     self.task_queue.task_done()

@@ -1,12 +1,12 @@
 
-from . connect_device import connect_device
+from . android_connect_device import connect_device
 import logging
-from . tiktok_common import click_bound,open_tiktok,click_element, random_sleep
+from . android_common import click_bound,open_tiktok,click_element, random_sleep
 import requests
 from urllib.parse import urlparse, urlunparse
 logger = logging.getLogger(__name__)
 
-def perform_tiktok_videa_data(**kwargs):
+def perform_tiktok_video_data(**kwargs):
     device_id = kwargs.get('device_id')
     pad_code = kwargs.get('pad_code')
     local_ip = kwargs.get('local_ip')

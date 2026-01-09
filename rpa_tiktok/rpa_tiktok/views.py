@@ -5,10 +5,10 @@ import logging
 
 from . import bit_post
 from . import bit_scrolling
-from . import tiktok_post
-from . import tiktok_scrolling
+from . import android_post
+from . import android_scrolling
 
-from . tiktok_video_data import perform_tiktok_videa_data
+from . android_video_data import perform_tiktok_video_data
 from . task_manager import task_manager
 
 # 获取logger实例
@@ -26,7 +26,7 @@ def tiktok_videa_data(request):
             local_ip = data.get('local_ip')
             local_port = data.get('local_port')
             task_id = task_manager.add_task(
-                task_func=perform_tiktok_videa_data,
+                task_func=perform_tiktok_video_data,
                 device_id=device_id,
                 pad_code=pad_code,
                 local_ip=local_ip,
@@ -76,7 +76,7 @@ def tiktok_post(request):
             if device_id.startswith("BIT"):
                 task_func = bit_post.perform_tiktok_post
             else:
-                task_func = tiktok_post.perform_tiktok_post
+                task_func = android_post.perform_tiktok_post
 
             task_id = task_manager.add_task(
                     task_func=task_func,
@@ -138,7 +138,7 @@ def tiktok_scrolling(request):
             if device_id.startswith("BIT"):
                 task_func = bit_scrolling.perform_tiktok_scrolling
             else:
-                task_func = tiktok_scrolling.perform_tiktok_scrolling
+                task_func = android_scrolling.perform_tiktok_scrolling
             # 将任务添加到任务管理器
             task_id = task_manager.add_task(
                 task_func=task_func,

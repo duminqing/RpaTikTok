@@ -4,7 +4,7 @@ import socket
 import subprocess
 import threading
 from paramiko import SSHClient, AutoAddPolicy
-from . import vmos 
+from . import android_vmos
 import uiautomator2 as u2
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ def prepareEnviroment(device_id: str, pad_code: str, local_ip: str, local_port: 
     """ 准备环境 """
     if device_id.startswith("VMOS"):
         #判断如果device_id以"VMOS"开头
-        pad_info = vmos.get_pad_adb(pad_code)
+        pad_info = android_vmos.get_pad_adb(pad_code)
         pad_info["device_id"] = device_id
         pad_info["local_ip"] = local_ip
         pad_info["local_port"] = local_port
