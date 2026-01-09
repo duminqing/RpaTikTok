@@ -19,13 +19,13 @@ async def run_single_browser(**kwargs):
         browser = await chromium.connect_over_cdp(ws)
         default_context = browser.contexts[0]
         page = await default_context.new_page()
-
+        tiktok_account = kwargs.get('tiktok_account')
         # 监听API请求
-        page.on("response", handle_api_response)
+        page.on("response", lambda response: handle_api_response(response, tiktok_account))
 
         try:
             # 打开目标TikTok页面
-            await page.goto('https://www.tiktok.com/@x9.hello', timeout=60000)
+            await page.goto(f"https://www.{tiktok_account}", timeout=60000)
             print("Successfully navigated to the TikTok profile")
             # 可能需要等待页面加载完成
             await page.wait_for_load_state('networkidle')
@@ -53,7 +53,7 @@ async def scroll_and_collect_videos(page):
         await page.wait_for_timeout(1000)
     print("Scrolling completed, waiting for API responses")
 
-async def handle_api_response(response):
+async def handle_api_response(response,tiktok_account):
     """处理API响应的回调函数"""
     if "https://www.tiktok.com/api/post/item_list/" in response.url:
         try:
@@ -66,18 +66,20 @@ async def handle_api_response(response):
             else:
                 print(f"Response data: {data_str}")
             # 在这里可以处理获取到的数据
-            process_video_data(data)
+            process_video_data(data,tiktok_account)
         except Exception as e:
             print(f"Error processing API response: {e}")
 
 
-def process_video_data(data):
+def process_video_data(data,tiktok_account):
     """处理获取到的视频数据"""
     # 实现具体的数据处理逻辑
     if 'itemList' in data:
+        all_data = []
         videos = data['itemList']
         print(f"Found {len(videos)} videos")
         for video in videos:
+            my={}
             video_id = video.get('id')
             # 获取统计数据
             stats = video.get('stats', {})
@@ -87,6 +89,23 @@ def process_video_data(data):
             play_count = stats.get('playCount', 0)
             share_count = stats.get('shareCount', 0)
             # 打印详细信息
-            print(f"Video ID: {video_id},")
-            print(f"  Statistics - Collects: {collect_count}, Comments: {comment_count}, "
-                  f"Diggs: {digg_count}, Plays: {play_count}, Shares: {share_count}")
+            my["tiktokAccount"]=tiktok_account
+            my["postId"]=video_id
+            my["collects"]=collect_count
+            my["comments"]=comment_count
+            my["diggs"]=digg_count
+            my["plays"]=play_count
+            my["shares"]=share_count
+            all_data.append(my)
+        # 保存数据
+        try:
+            print(f"发往java数据{all_data}")
+            response = requests.post(
+                "http://localhost/rpa/post_data/batchAdd",
+                json=all_data,
+                headers={"Content-Type": "application/json"}
+            )
+            print(f"API Response Status: {response.status_code}")
+            print(f"API Response: {response.text}")
+        except Exception as e:
+            print(f"Error sending data to API: {e}")

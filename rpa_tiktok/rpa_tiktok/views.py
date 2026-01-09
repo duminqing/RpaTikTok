@@ -27,6 +27,7 @@ def tiktok_video_data(request):
             pad_code = data.get('pad_code')
             local_ip = data.get('local_ip')
             local_port = data.get('local_port')
+            tiktok_account = data.get('tiktok_account')
             if device_id.startswith("BIT"):
                 task_func = bit_video_data.perform_tiktok_video_data
             else:
@@ -38,6 +39,7 @@ def tiktok_video_data(request):
                 pad_code=pad_code,
                 local_ip=local_ip,
                 local_port=local_port,
+                tiktok_account=tiktok_account,
                 task_type='tiktok_video_data'
             )
             # 获取队列大小
