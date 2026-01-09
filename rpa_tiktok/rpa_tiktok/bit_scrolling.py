@@ -8,15 +8,10 @@ def perform_tiktok_scrolling(**kwargs):
     asyncio.run(run_single_browser(**kwargs))
 
 async def run_single_browser(**kwargs):
-    """
-    单个浏览器执行任务
-    :param browser_id: 浏览器ID
-    :param search_queries: 搜索关键词列表
-    """
-    search_queries = kwargs.get('memo').split(',')
-    browser_id = kwargs.get('pad_code')
-    scrolling_time = int(kwargs.get('scrolling_time'))
     async with async_playwright() as playwright:
+        search_queries = kwargs.get('memo').split(',')
+        browser_id = kwargs.get('pad_code')
+        scrolling_time = int(kwargs.get('scrolling_time'))
         res = openBrowser(browser_id)
         ws = res['data']['ws']
         print(f"Browser {browser_id} - ws address ==>>> {ws}")

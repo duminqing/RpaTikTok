@@ -4,9 +4,11 @@ import json
 import logging
 
 from . import bit_post
+from . import bit_video_data
 from . import bit_scrolling
 from . import android_post
 from . import android_scrolling
+from . import android_video_data
 
 from . android_video_data import perform_tiktok_video_data
 from . task_manager import task_manager
@@ -17,7 +19,7 @@ logger = logging.getLogger(__name__)
 def hello(request):
     return HttpResponse("Hello, World!")
 @csrf_exempt
-def tiktok_videa_data(request):
+def tiktok_video_data(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -25,13 +27,18 @@ def tiktok_videa_data(request):
             pad_code = data.get('pad_code')
             local_ip = data.get('local_ip')
             local_port = data.get('local_port')
+            if device_id.startswith("BIT"):
+                task_func = bit_video_data.perform_tiktok_video_data
+            else:
+                task_func = android_video_data.perform_tiktok_video_data
+
             task_id = task_manager.add_task(
-                task_func=perform_tiktok_video_data,
+                task_func=task_func,
                 device_id=device_id,
                 pad_code=pad_code,
                 local_ip=local_ip,
                 local_port=local_port,
-                task_type='tiktok_videa_data'
+                task_type='tiktok_video_data'
             )
             # 获取队列大小
             queue_size = task_manager.get_device_queue_size(device_id)
